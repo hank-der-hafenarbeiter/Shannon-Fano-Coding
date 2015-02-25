@@ -29,3 +29,11 @@ void Symbol::operator ++ (const int i)
 {
     count += i;
 }
+
+
+QDebug operator<<(QDebug dbg, const Symbol &sym)
+{
+    dbg.nospace() << "(" << sym.getSym() << ", " << sym.getCode() << ", " << sym.getCount() <<  ")";
+
+    return dbg.space();
+}

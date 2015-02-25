@@ -17,7 +17,7 @@
 #include <functional>
 #include <bitset>
 
-#include "sfvector.h"
+#include "sflist.h"
 
 
 class symbol;
@@ -38,7 +38,7 @@ public:
 
 
 private:
-    SFVector index;
+    SFList index;
     QString inputText;
     QTextEdit* inputField;
     QString outputText;

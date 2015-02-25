@@ -9,10 +9,10 @@ MainWindow::MainWindow(QWidget *parent) :
     codec = new SFCodec(ui->inputField);
     QWidget::showMaximized();
 
-    ui->treeView->show();
     QImage temp(ui->treeView->width(), ui->treeView->height(), QImage::Format_ARGB32);
     temp.fill(QColor(255,255,255));
     ui->treeView->setPixmap(QPixmap::fromImage(temp));
+    ui->treeView->show();
 
 }
 
@@ -24,12 +24,18 @@ void MainWindow::on_inputField_textChanged()
         ui->outputField->setText(codec->encode());
         ui->textbinary_field->setText(codec->toBin());
         codec->updateTable(ui->key_table);
-        ui->treeView->setPixmap(QPixmap::fromImage(codec->getTreeView(ui->treeView->width(), ui->treeView->height())));
         textBuffer = ui->inputField->toPlainText();
+
+
+        QImage temp(ui->treeView->width(), ui->treeView->height(), QImage::Format_ARGB32);
+        temp.fill(QColor(255,255,255));
+        ui->treeView->setPixmap(QPixmap::fromImage(temp));
+        ui->treeView->setPixmap(QPixmap::fromImage(codec->getTreeView(ui->treeView->width(), ui->treeView->height())));
     }
 }
 
 MainWindow::~MainWindow()
 {
+    delete codec;
     delete ui;
 }

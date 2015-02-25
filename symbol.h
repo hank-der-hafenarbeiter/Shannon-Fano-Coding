@@ -3,12 +3,14 @@
 
 #include <QChar>
 #include <QString>
+#include <QDebug>
 
 
 class Symbol {
 public:
     Symbol(QChar p_sym = QChar());
     Symbol(const Symbol& p_sym){sym = p_sym.getSym(); count = p_sym.getCount(); prob = p_sym.getProb(); code = p_sym.getCode();};
+    Symbol(Symbol& p_sym){sym = p_sym.getSym(); count = p_sym.getCount(); prob = p_sym.getProb(); code = p_sym.getCode();};
 
     void setSym(QChar p_sym){sym = p_sym;};
     void setCount(int p_count){count = p_count;};
@@ -33,4 +35,10 @@ private:
     double prob;	//speicher wahrscheinlichkeit
     QString code;		//das codierte gegenstück
 };
+
+
+
+QDebug operator<<(QDebug dbg, const Symbol &sym);
+
+
 #endif // SYMBOL_H

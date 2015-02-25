@@ -16,12 +16,12 @@ QMAKE_CXXFLAGS += -std=c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     sfcodec.cpp \
-    sfvector.cpp \
-    symbol.cpp
+    symbol.cpp \
+    sflist.cpp
 
 HEADERS  += mainwindow.h \
     sfcodec.h \
-    sfvector.h \
-    symbol.h
+    symbol.h \
+    sflist.h
 
 FORMS    += mainwindow.ui

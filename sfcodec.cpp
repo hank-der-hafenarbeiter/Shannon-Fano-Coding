@@ -78,7 +78,7 @@ void SFCodec::updateIndex()
     //  4.) merge all the vectors back together
     //
     //A more performant but less readable solution would be to not split the vector
-    //and call the function with two additional iterators: void(SFVector&, iterator, iterator)
+    //and call the function with two additional iterators: void(SFList&, iterator, iterator)
     //
     //The function needs a recursion so there are only two feasable implemantions:
     //  1.) as a member function of SFCodec
@@ -86,43 +86,32 @@ void SFCodec::updateIndex()
     //
     //The advantage of this lambda is that add_code() is only available where it's relevant -> within SFCodec::updateIndex().
     //This prevents unnecessarry (possibly harmfull) calls from outside.
-    std::function<void(SFVector&)> add_code = [&](SFVector& vec_left)
+    std::function<void(SFList&)> add_code = [&](SFList& vec_left)
     {
         if(vec_left.size() < 2)         //if there is only one element left we are done in this branch
-        {
             vec_left.begin()->setCode(QString("1"));
-            return;
+        else
+        {
+
+            SFList vec_right;     //add a vector to hold the right half of the tree
+
+            SFList::split(vec_left, vec_right);
+
+            //add zeros on the left and ones on the right
+            if(vec_left.size())
+                std::for_each(vec_left.begin(),vec_left.end(),[](Symbol& sym){sym.appendCode("0");});
+            if(vec_right.size())
+                std::for_each(vec_right.begin(), vec_right.end(), [](Symbol& sym){sym.appendCode("1");});
+
+            //recursive call for each vector
+            if(vec_left.size() > 1)
+                add_code(vec_left);
+            if(vec_right.size() > 1)
+                add_code(vec_right);
+
+            vec_left += vec_right; //and merge them all back together
         }
 
-        SFVector vec_right;     //add a vector to hold the right half of the tree
-
-        double diff1 = 1, diff2 = 0; //the difference between the sum of probabilities during the previous and current iteration
-
-        do
-        {
-            vec_right.prepend(vec_left.last());
-            vec_left.pop_back();
-            diff2 = diff1;
-            diff1 = fabs(vec_left.sum() - vec_right.sum());
-        }while((diff1-diff2) < 0); //compare two diffs to check if the iteration improved or worsened the result
-
-        //the loop continues until it worsened the difference once so we have to roll back once
-        vec_left.append(vec_right.first());
-        vec_right.pop_front();
-
-        //add zeros on the left and ones on the right
-        if(vec_left.size())
-            std::for_each(vec_left.begin(),vec_left.end(),[](Symbol& sym){sym.appendCode("0");});
-        if(vec_right.size())
-            std::for_each(vec_right.begin(), vec_right.end(), [](Symbol& sym){sym.appendCode("1");});
-
-        //recursive call for each vector
-        if(vec_left.size() > 1)
-            add_code(vec_left);
-        if(vec_right.size() > 1)
-            add_code(vec_right);
-
-        vec_left += vec_right; //and merge them all back together
     };
 
     //note that the previous ~40 lines were a lambda function DECLARATION. Here we actually call that lambda function handing
@@ -164,7 +153,7 @@ void SFCodec::updateStatus(QStatusBar* status)
 
 QImage SFCodec::getTreeView(int width, int height)
 {
-    qDebug() << width << " " << height;
+
     int treeWidth = width-50,                           //the tree should have 25px spacing on each side
         treeHeight = height-50,
         max_step_x = treeWidth/4, //max step length (i.e. the first step big step from the root)
@@ -174,7 +163,7 @@ QImage SFCodec::getTreeView(int width, int height)
         length = 0;     //helper variable to calculate the depth
 
     QPoint p1(treeWidth/2,5),p2(0,0);           //Lines are drawn between two points. These are the two points...
-    QImage image(width, height, QImage::Format_ARGB32); //new image with the right dimensions
+    QImage image(width, height-1, QImage::Format_ARGB32); //new image with the right dimensions WORKAROUND: without the "-1" the label will expand upwards for some reason
 
     image.fill(QColor(255,255,255,255));    //filled in with white (NOTE: the format is ARGB so the first '255' is the alpha channel)
     if(index.isEmpty())                     //no input text -> no code -> no tree
@@ -183,7 +172,6 @@ QImage SFCodec::getTreeView(int width, int height)
     QPainter painter(&image);   //Qt device that does all the painting
 
     painter.setPen(QPen(QColor(0,0,0)));    //paints in black
-    painter.setBrush(QBrush(QColor(Qt::color0), Qt::NoBrush));
     painter.setRenderHint(QPainter::Antialiasing);  //activate antialiasing since performance isn't an issue
 
     //calculate depth by finding the symbol with the longest code (each digit in the code is one level of depth)
@@ -198,30 +186,72 @@ QImage SFCodec::getTreeView(int width, int height)
     step_y = treeHeight/depth;
 
 
-    //paint the path for each symbol
-    //note that we always start from the root so some lines are painted multiple times
-    //this could be prevented by a recursive call which would be less readable and
-    //(probably) not significantly faster.
-    std::for_each(index.begin(), index.end(),[&](Symbol sym)
+
+
+
+    std::function<void(SFList&, QPoint, int)> draw = [&](SFList list_left, QPoint p_begin, int level)
     {
-        p1 = QPoint(treeWidth/2,5);  //reset to starting position
-        step_x = max_step_x;        //and step length
-        QString temp = sym.getCode();
-        do{
-           if(temp.at(0) == '1')
-                p2 = p1 + QPoint(step_x,step_y);
-            else
-                p2 = p1 + QPoint(-step_x,step_y);
-            step_x = step_x/2;
+        int pos = 0;
+        SFList list_right;
+        QPoint p_end;
+        int t_step_x = step_x/pow(2, level);
 
-            painter.drawLine(p1,p2);
-            p1 = p2;
+        if(list_left.size())
+        {
+            QList<Symbol>::iterator iter = std::find_if(list_left.begin(), list_left.end(), [&](Symbol sym){return sym.getCode().at(level) == '1';});   //iterator to first symbol with a "1js" on this level's position
 
-            temp.remove(0,1);
-        }while(temp.size());
-        p1 = p1 + QPoint(-5,15);
-        painter.drawText(p1, sym.getSym());
-    });
+            pos = iter - list_left.begin();  //QList::mid() only takes int as parameter. Luckily pointer arithmetic is implemented with QList::iterators
+            list_right = SFList(list_left.mid(pos));
+            list_left = SFList(list_left.mid(0, pos));
+
+
+
+
+            if(list_left.size())
+            {
+                p_end = p_begin + QPoint(-t_step_x,step_y);
+                painter.drawLine(p_begin, p_end);
+
+                if(level < 5)   //in higher levels there isn't enough space...
+                {
+                    painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
+                    painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(-35,0), QString::number(list_left.sum(), 'f', 3).right(4));
+                    painter.setPen(QPen(QColor(0,0,0)));  //back to black
+                }
+
+                if(list_left.size() > 1)
+                    draw(list_left, p_end, level+1);
+                else
+                {
+                    p_end = p_end + QPoint(-5,15);
+                    painter.drawText(p_end, list_left.first().getSym());
+                }
+
+            }
+
+            if(list_right.size())
+            {
+                p_end = p_begin + QPoint(t_step_x, step_y);
+                painter.drawLine(p_begin, p_end);
+                if(level < 5)   //in higher levels there isn't enough space...
+                {
+                    painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
+                    painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(5,0), QString::number(list_right.sum(), 'f', 3).right(4));
+                    painter.setPen(QPen(QColor(0,0,0)));  //back to black
+                }
+                if(list_right.size() > 1)
+                    draw(list_right, p_end, level+1);
+                else
+                {
+                    p_end = p_end + QPoint(-5,15);
+                    painter.drawText(p_end, list_right.first().getSym());
+                }
+            }
+        }
+
+    };
+
+    draw(index, p1, 0);
     painter.end();
     return image;
 }
