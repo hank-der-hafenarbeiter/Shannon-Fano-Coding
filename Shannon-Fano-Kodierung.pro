@@ -25,3 +25,7 @@ HEADERS  += mainwindow.h \
     sflist.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES += \
+    README.txt \
+    LICENSE.txt
