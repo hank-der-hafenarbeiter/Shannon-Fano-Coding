@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     temp.fill(QColor(255,255,255));
     ui->treeView->setPixmap(QPixmap::fromImage(temp));
     ui->treeView->show();
+    ui->statusBar->show();
+    ui->statusBar->showMessage("Ready",2000);
 
 }
 
@@ -23,13 +25,11 @@ void MainWindow::on_inputField_textChanged()
         codec->updateIndex();
         ui->outputField->setText(codec->encode());
         ui->textbinary_field->setText(codec->toBin());
+        codec->updateStatus(ui->statusBar);
         codec->updateTable(ui->key_table);
         textBuffer = ui->inputField->toPlainText();
 
 
-        QImage temp(ui->treeView->width(), ui->treeView->height(), QImage::Format_ARGB32);
-        temp.fill(QColor(255,255,255));
-        ui->treeView->setPixmap(QPixmap::fromImage(temp));
         ui->treeView->setPixmap(QPixmap::fromImage(codec->getTreeView(ui->treeView->width(), ui->treeView->height())));
     }
 }

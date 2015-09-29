@@ -1,6 +1,7 @@
 #ifndef SFVector_H
 #define SFVector_H
 
+#include <iostream>
 #include <QVector>
 #include <QObject>
 #include "symbol.h"
@@ -16,7 +17,8 @@ public:
 
     double sum();
 
-    static void split(SFList& vec_left, SFList& vec_right);
+    static SFList::iterator split(const SFList::iterator it1, const SFList::iterator it2);
+    static inline double sum(const SFList::iterator it1, const SFList::iterator it2);
 private:
 
 

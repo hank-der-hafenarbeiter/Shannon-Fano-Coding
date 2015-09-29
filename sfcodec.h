@@ -1,10 +1,12 @@
 #ifndef SFCODEC_H
 #define SFCODEC_H
 
+#include <iostream>
 #include <QObject>
 #include <QVector>
 #include <QString>
 #include <QChar>
+#include <QLabel>
 #include <QTableWidget>
 #include <QStatusBar>
 #include <QTextEdit>

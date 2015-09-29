@@ -33,7 +33,7 @@ void Symbol::operator ++ (const int i)
 
 QDebug operator<<(QDebug dbg, const Symbol &sym)
 {
-    dbg.nospace() << "(" << sym.getSym() << ", " << sym.getCode() << ", " << sym.getCount() <<  ")";
+    dbg.nospace() << "(" << sym.getSym() << ", " << sym.getCode() << ", " << sym.getProb() <<  ")";
 
     return dbg.space();
 }
