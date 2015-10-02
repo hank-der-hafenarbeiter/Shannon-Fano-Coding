@@ -168,73 +168,75 @@ QImage SFCodec::getTreeView(int width, int height)
         step_y = treeHeight/depth;
 
 
+        std::shared_ptr<SFTreeNode> tree = std::make_shared<SFTreeNode>(index);
+
+        return SFTreeNode::drawTree(tree, width,height);
+
+
+//        std::function<void(SFList&, QPoint, int)> draw = [&](SFList list_left, QPoint p_begin, int level)
+//        {
+//            int pos = 0;
+//            SFList list_right;
+//            QPoint p_end;
+//            int t_step_x = step_x/pow(2, level);
+
+//            if(list_left.size())
+//            {
+//                QList<Symbol>::iterator iter = std::find_if(list_left.begin(), list_left.end(), [&](Symbol sym){return sym.getCode().at(level) == '1';});   //iterator to first symbol with a "1js" on this level's position
+
+//                pos = iter - list_left.begin();  //QList::mid() only takes int as parameter. Luckily pointer arithmetic is implemented with QList::iterators
+//                list_right = SFList(list_left.mid(pos));
+//                list_left = SFList(list_left.mid(0, pos));
 
 
 
-        std::function<void(SFList&, QPoint, int)> draw = [&](SFList list_left, QPoint p_begin, int level)
-        {
-            int pos = 0;
-            SFList list_right;
-            QPoint p_end;
-            int t_step_x = step_x/pow(2, level);
 
-            if(list_left.size())
-            {
-                QList<Symbol>::iterator iter = std::find_if(list_left.begin(), list_left.end(), [&](Symbol sym){return sym.getCode().at(level) == '1';});   //iterator to first symbol with a "1js" on this level's position
+//                if(list_left.size())
+//                {
+//                    p_end = p_begin + QPoint(-t_step_x,step_y);
+//                    painter.drawLine(p_begin, p_end);
 
-                pos = iter - list_left.begin();  //QList::mid() only takes int as parameter. Luckily pointer arithmetic is implemented with QList::iterators
-                list_right = SFList(list_left.mid(pos));
-                list_left = SFList(list_left.mid(0, pos));
+//                    if(level < 5)   //in higher levels there isn't enough space...
+//                    {
+//                        painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
+//                        painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(-35,0), QString::number(SFList::sum(list_left.begin(), list_left.end()), 'f', 3).right(4));
+//                        painter.setPen(QPen(QColor(0,0,0)));  //back to black
+//                    }
 
+//                    if(list_left.size() > 1)
+//                        draw(list_left, p_end, level+1);
+//                    else
+//                    {
+//                        p_end = p_end + QPoint(-5,15);
+//                        painter.drawText(p_end, list_left.first().getSym());
+//                    }
 
+//                }
 
+//                if(list_right.size())
+//                {
+//                    p_end = p_begin + QPoint(t_step_x, step_y);
+//                    painter.drawLine(p_begin, p_end);
+//                    if(level < 5)   //in higher levels there isn't enough space...
+//                    {
+//                        painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
+//                        painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(5,0), QString::number(SFList::sum(list_right.begin(), list_right.end()), 'f', 3).right(4));
+//                        painter.setPen(QPen(QColor(0,0,0)));  //back to black
+//                    }
+//                    if(list_right.size() > 1)
+//                        draw(list_right, p_end, level+1);
+//                    else
+//                    {
+//                        p_end = p_end + QPoint(-5,15);
+//                        painter.drawText(p_end, list_right.first().getSym());
+//                    }
+//                }
+//            }
 
-                if(list_left.size())
-                {
-                    p_end = p_begin + QPoint(-t_step_x,step_y);
-                    painter.drawLine(p_begin, p_end);
+//        };
 
-                    if(level < 5)   //in higher levels there isn't enough space...
-                    {
-                        painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
-                        painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(-35,0), QString::number(SFList::sum(list_left.begin(), list_left.end()), 'f', 3).right(4));
-                        painter.setPen(QPen(QColor(0,0,0)));  //back to black
-                    }
-
-                    if(list_left.size() > 1)
-                        draw(list_left, p_end, level+1);
-                    else
-                    {
-                        p_end = p_end + QPoint(-5,15);
-                        painter.drawText(p_end, list_left.first().getSym());
-                    }
-
-                }
-
-                if(list_right.size())
-                {
-                    p_end = p_begin + QPoint(t_step_x, step_y);
-                    painter.drawLine(p_begin, p_end);
-                    if(level < 5)   //in higher levels there isn't enough space...
-                    {
-                        painter.setPen(QPen(QColor(200,200,200)));  //paint numbers in grey
-                        painter.drawText(p_begin + 0.25*(p_end - p_begin) + QPoint(5,0), QString::number(SFList::sum(list_right.begin(), list_right.end()), 'f', 3).right(4));
-                        painter.setPen(QPen(QColor(0,0,0)));  //back to black
-                    }
-                    if(list_right.size() > 1)
-                        draw(list_right, p_end, level+1);
-                    else
-                    {
-                        p_end = p_end + QPoint(-5,15);
-                        painter.drawText(p_end, list_right.first().getSym());
-                    }
-                }
-            }
-
-        };
-
-        draw(index, p1, 0);
-        painter.end();
+//        draw(index, p1, 0);
+//        painter.end();
     }
     return image;
 }

@@ -16,6 +16,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->show();
     ui->statusBar->showMessage("Ready",2000);
 
+    QObject::connect(ui->StepBotton, SIGNAL(clicked()),this,SLOT(on_stepButton_clicked()));
+    QObject::connect(ui->PrevStepBottom, SIGNAL(clicked()), this, SLOT(on_prevStepButton_clicked()));
+    QObject::connect(ui->autoStepCheck, SIGNAL(clicked()), this, SLOT(on_autoStepCheck_clicked()));
+    QObject::connect(ui->smallStepCheck, SIGNAL(clicked()), this, SLOT(on_smallStepCheck_clicked()));
+
 }
 
 void MainWindow::on_inputField_textChanged()
@@ -29,9 +34,53 @@ void MainWindow::on_inputField_textChanged()
         codec->updateTable(ui->key_table);
         textBuffer = ui->inputField->toPlainText();
 
-
-        ui->treeView->setPixmap(QPixmap::fromImage(codec->getTreeView(ui->treeView->width(), ui->treeView->height())));
+        codeTree = std::make_shared<SFTreeNode>(codec->getIndex());
+        if(ui->autoStepCheck->isChecked())
+            while(codeTree->step());
+        ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
     }
+}
+
+void MainWindow::on_stepButton_clicked()
+{
+    if(codeTree)
+    {
+        if(ui->smallStepCheck->isChecked())
+            codeTree->smallStep();
+        else
+            codeTree->step();
+        ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
+    }
+}
+void MainWindow::on_prevStepButton_clicked()
+{
+    if(codeTree)
+    {
+        codeTree->step_back();
+        ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
+    }
+}
+
+void MainWindow::on_autoStepCheck_clicked()
+{
+    ui->StepBotton->setDisabled(ui->autoStepCheck->isChecked());
+    ui->PrevStepBottom->setDisabled(ui->autoStepCheck->isChecked());
+    if(codeTree && ui->autoStepCheck->isChecked())
+    {
+        while(codeTree->step());
+        ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
+    }
+}
+
+void MainWindow::on_smallStepCheck_clicked()
+{
+    if(ui->smallStepCheck->isChecked())
+        ui->PrevStepBottom->setDisabled(true);
+    else
+        ui->PrevStepBottom->setDisabled(false);
+    codeTree.reset();
+    codeTree = std::make_shared<SFTreeNode>(codec->getIndex());
+    ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
 }
 
 MainWindow::~MainWindow()

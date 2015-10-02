@@ -17,6 +17,7 @@ public:
 
     double sum();
 
+
     static SFList::iterator split(const SFList::iterator it1, const SFList::iterator it2);
     static inline double sum(const SFList::iterator it1, const SFList::iterator it2);
 private:

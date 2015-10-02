@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1169</width>
-    <height>762</height>
+    <width>564</width>
+    <height>524</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -107,34 +107,78 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableWidget" name="key_table">
-        <property name="maximumSize">
-         <size>
-          <width>400</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <column>
-         <property name="text">
-          <string>Zeichen</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Anzahl</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Häufigkeit</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Code</string>
-         </property>
-        </column>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QTableWidget" name="key_table">
+          <property name="maximumSize">
+           <size>
+            <width>400</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <column>
+           <property name="text">
+            <string>Zeichen</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Anzahl</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Häufigkeit</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Code</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QPushButton" name="StepBotton">
+              <property name="text">
+               <string>Next Step</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="PrevStepBottom">
+              <property name="text">
+               <string>Previous Step</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QCheckBox" name="autoStepCheck">
+              <property name="text">
+               <string>Step automatically</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="smallStepCheck">
+              <property name="text">
+               <string>Small Steps</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -145,7 +189,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1169</width>
+     <width>564</width>
      <height>25</height>
     </rect>
    </property>

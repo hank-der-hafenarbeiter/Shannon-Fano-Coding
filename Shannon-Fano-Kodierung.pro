@@ -17,12 +17,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     sfcodec.cpp \
     symbol.cpp \
-    sflist.cpp
+    sflist.cpp \
+    sftreenode.cpp
 
 HEADERS  += mainwindow.h \
     sfcodec.h \
     symbol.h \
-    sflist.h
+    sflist.h \
+    sftreenode.h
 
 FORMS    += mainwindow.ui
 

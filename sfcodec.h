@@ -20,6 +20,7 @@
 #include <bitset>
 
 #include "sflist.h"
+#include "sftreenode.h"
 
 
 class symbol;
@@ -33,6 +34,8 @@ public:
     QString toBin();
 
     void updateIndex(); //calculate the code
+    SFList getIndex(){return index;}
+
 
     void updateTable(QTableWidget* table); //erneuert die informationen in der tabelle
     void updateStatus(QStatusBar* status); //erneuert die nachricht in der status leiste
