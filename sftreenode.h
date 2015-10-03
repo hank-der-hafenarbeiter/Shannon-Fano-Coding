@@ -11,6 +11,10 @@
 
 const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branches that are to small
 
+
+/**
+ * @brief The SFTreeNode class is a simple binary tree implementation with special functionality for the Shannon Fano coding
+ */
 class SFTreeNode: public std::enable_shared_from_this<SFTreeNode>
 {
 public:

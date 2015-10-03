@@ -25,6 +25,16 @@
 
 class symbol;
 
+/**
+ * \class SFCodec
+ * @brief Implementation of the Shannon Fano coding
+ *
+ * This class generates an index of all symbols in the
+ * source text and it's correspondent code according to
+ * the Shannnon Fano coding
+ *
+ */
+
 class SFCodec
 {
 public:
@@ -39,10 +49,11 @@ public:
 
     void updateTable(QTableWidget* table); //erneuert die informationen in der tabelle
     void updateStatus(QStatusBar* status); //erneuert die nachricht in der status leiste
-    QImage getTreeView(int width, int height);
 
 
 private:
+    void updateIndexHelper(const SFList::iterator it1, const SFList::iterator it2);
+
     SFList index;
     QString inputText;
     QTextEdit* inputField;

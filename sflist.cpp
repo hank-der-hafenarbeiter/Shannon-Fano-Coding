@@ -14,7 +14,10 @@ SFList::SFList(QList<Symbol> list) :
 
 
 
-
+/**
+ * @brief SFList::sum sums the probability of all symbols in this list
+ * @return return propability of all symbols in this list
+ */
 inline double SFList::sum()
 {
     double t_sum = 0;
@@ -24,6 +27,12 @@ inline double SFList::sum()
     return t_sum;
 }
 
+/**
+ * @brief SFList::sum return sum of probabilities of symbols in [it1,it2)
+ * @param it1 SFList::iterator first element to be summed
+ * @param it2 SFList::iterator to behind the last element to be summed
+ * @return sum of probabilities between the two iterators
+ */
 inline double SFList::sum(const SFList::iterator it1, const SFList::iterator it2)
 {
     double sum = 0;
@@ -34,6 +43,12 @@ inline double SFList::sum(const SFList::iterator it1, const SFList::iterator it2
     return sum;
 }
 
+/**
+ * @brief SFList::split split list [it1,it2) so that both have an equal sum of propabilities
+ * @param it1 SFList::iterator pointing to the first element of the range
+ * @param it2 SFList::iterator to behind the last element of the range
+ * @return SFList::iterator iter so that sum[it1,iter) == sum[iter,it2)
+ */
 SFList::iterator SFList::split(const SFList::iterator it1, const SFList::iterator it2) //There is an exact solution to this problem in pseudo-linear time but i chose an easier heuristic that grants adequate results
 {
     SFList::iterator iter = it2;
