@@ -25,21 +25,21 @@ bool SFTreeNode::step()
 {
     bool result = false;
 
-    if(m_payload.length() > 1)
+    if(m_payload.length() > 1)  //Node contains more than one Symbol it will be an inner node in the final tree therefore
     {
-        SFList::iterator iter = SFList::split(m_payload.begin(), m_payload.end());
+        SFList::iterator iter = SFList::split(m_payload.begin(), m_payload.end());  //the payload needs to be split into two
         int pos = iter - m_payload.begin();
-        setLeftChild(m_payload.mid(0,pos));
+        setLeftChild(m_payload.mid(0,pos));                                         //distributed to the two child nodes
         setRightChild(m_payload.mid(pos));
-        m_payload.clear();
-        result = true;
+        m_payload.clear();                                                          //SFList::mid() constructs a copy
+        result = true;                                                              //so m_payload needs to be cleared
     }
     else
     {
         if(m_left_child)
-            result = m_left_child->step() || result;
+            result =result || m_left_child->step();
         if(m_right_child)
-            result = m_right_child->step() ||result;
+            result = result || m_right_child->step();
     }
     return result;
 }
@@ -65,9 +65,9 @@ bool SFTreeNode::step_back()
     else
     {
         if(m_left_child)
-            m_left_child->step_back();
+            result = result || m_left_child->step_back();
         if(m_right_child)
-            m_right_child->step_back();
+            result = result || m_right_child->step_back();
     }
 
     if(!m_right_child && !m_left_child)

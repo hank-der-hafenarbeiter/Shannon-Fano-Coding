@@ -26,6 +26,7 @@ public:
 
     std::size_t getShortestDistanceToLeaf(){return m_shortest_distance_to_leaf;}
     std::size_t getDistanceToRoot(){return m_distance_to_root;}
+
     double sumBranch();
     double balance();
 
