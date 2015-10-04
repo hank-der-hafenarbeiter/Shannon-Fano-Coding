@@ -18,7 +18,7 @@ SFList::SFList(QList<Symbol> list) :
  * @brief SFList::sum sums the probability of all symbols in this list
  * @return return propability of all symbols in this list
  */
-inline double SFList::sum()
+inline double SFList::sum() const
 {
     double t_sum = 0;
 

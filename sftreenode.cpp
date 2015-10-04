@@ -1,6 +1,6 @@
 #include "sftreenode.h"
 
-SFTreeNode::SFTreeNode(SFList p_payload, std::shared_ptr<SFTreeNode> p_parent, std::size_t p_distance_to_root):
+SFTreeNode::SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_parent, std::size_t p_distance_to_root):
     m_parent(p_parent),
     m_payload(p_payload),
     m_distance_to_root(p_distance_to_root),
@@ -25,7 +25,6 @@ void SFTreeNode::setRightChild(const SFList p_payload)
 void SFTreeNode::setLeftChild(const SFList p_payload)
 {
     m_left_child = std::make_shared<SFTreeNode>(p_payload, shared_from_this(), m_distance_to_root+1);
-    m_shortest_distance_to_leaf = 1;
     setShortestDistanceToLeaf(1);
 }
 
@@ -221,7 +220,7 @@ QImage SFTreeNode::drawTree(std::shared_ptr<SFTreeNode> p_root, int p_width, int
  * @param p_distance_v vertical distance to children
  * @param p_distance_h horizontal distance to children
  */
-void SFTreeNode::draw(QPainter& p_painter, QPoint p_start, int p_distance_v, int p_distance_h)
+void SFTreeNode::draw(QPainter& p_painter, QPoint p_start, int p_distance_v, int p_distance_h) const
 {
     QPoint p_end;
     if(m_left_child)

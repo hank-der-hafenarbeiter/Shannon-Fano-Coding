@@ -111,7 +111,7 @@ void SFCodec::updateIndexHelper(const SFList::iterator it1, const SFList::iterat
  * @brief SFCodec::updateTable modify the table showing the data of each symbol
  * @param table pointer to the QTableWidget of the mainwindow
  */
-void SFCodec::updateTable(QTableWidget* table)
+void SFCodec::updateTable(QTableWidget* table) const
 {
     table->setColumnCount(4);
     table->setRowCount(index.size());
@@ -141,7 +141,7 @@ void SFCodec::updateTable(QTableWidget* table)
  * @brief SFCodec::updateStatus update the statusbar of the mainwindow
  * @param status pointer to the mainwindow's status bar
  */
-void SFCodec::updateStatus(QStatusBar* status)
+void SFCodec::updateStatus(QStatusBar* status) const
 {
     QString message;
     message = QString::number((double)outputText.length()*100/(double)outputBin.length()) + QString("%");

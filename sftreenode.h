@@ -18,7 +18,7 @@ const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branc
 class SFTreeNode: public std::enable_shared_from_this<SFTreeNode>
 {
 public:
-    SFTreeNode(SFList p_payload, std::shared_ptr<SFTreeNode> p_parent = 0, std::size_t p_distance_to_root = 0);
+    SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_parent = 0, std::size_t p_distance_to_root = 0);
 
     void setRightChild(const SFList p_payload);
     void setLeftChild(const SFList p_payload);
@@ -38,7 +38,7 @@ public:
     static QImage drawTree(std::shared_ptr<SFTreeNode> root, int width, int height);
 private:
 
-    void draw(QPainter& p_img, QPoint p_start, int p_distance_v, int p_distance_h);
+    void draw(QPainter& p_img, QPoint p_start, int p_distance_v, int p_distance_h) const;
     void killChildren();
     void setShortestDistanceToLeaf(size_t p_distance);
     void setDistanceToRoot(size_t p_distance);

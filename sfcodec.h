@@ -47,8 +47,8 @@ public:
     SFList getIndex(){return index;}
 
 
-    void updateTable(QTableWidget* table); //erneuert die informationen in der tabelle
-    void updateStatus(QStatusBar* status); //erneuert die nachricht in der status leiste
+    void updateTable(QTableWidget* table) const; //erneuert die informationen in der tabelle
+    void updateStatus(QStatusBar* status) const; //erneuert die nachricht in der status leiste
 
 
 private:
