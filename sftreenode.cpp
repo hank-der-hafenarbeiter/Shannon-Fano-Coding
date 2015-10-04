@@ -12,7 +12,7 @@ SFTreeNode::SFTreeNode(SFList p_payload, std::shared_ptr<SFTreeNode> p_parent, s
  * @brief SFTreeNode::setRightChild creates a right child with the given payload setting m_shortest_distance_to_leaf to 1
  * @param p_payload is the payload the child will be constructed with
  */
-void SFTreeNode::setRightChild(SFList p_payload)
+void SFTreeNode::setRightChild(const SFList p_payload)
 {
     m_right_child = std::make_shared<SFTreeNode>(p_payload, shared_from_this(), m_distance_to_root+1);
     setShortestDistanceToLeaf(1);
@@ -22,7 +22,7 @@ void SFTreeNode::setRightChild(SFList p_payload)
  * @brief SFTreeNode::setLeftChild creates a left child with the given payload setting m_shortest_distance_to_leaf to 1
  * @param p_payload is the payload the child will be constructed with
  */
-void SFTreeNode::setLeftChild(SFList p_payload)
+void SFTreeNode::setLeftChild(const SFList p_payload)
 {
     m_left_child = std::make_shared<SFTreeNode>(p_payload, shared_from_this(), m_distance_to_root+1);
     m_shortest_distance_to_leaf = 1;
@@ -296,7 +296,7 @@ void SFTreeNode::setDistanceToRoot(size_t p_distance)
  * @brief SFTreeNode::sumBranch return the sum of all symbols this node and all its children contain
  * @return sum of all symbols this node and all its children contain
  */
-double SFTreeNode::sumBranch()
+double SFTreeNode::sumBranch() const
 {
     double result = 0;
     for(Symbol sym:m_payload)
@@ -323,7 +323,7 @@ void SFTreeNode::killChildren()
  * @brief SFTreeNode::balance gives the difference between the sum of the right child tree substracted from the sum of the left child tree
  * @return difference between the two child trees
  */
-double SFTreeNode::balance()
+double SFTreeNode::balance() const
 {
     double result = 0;
     if(m_left_child)

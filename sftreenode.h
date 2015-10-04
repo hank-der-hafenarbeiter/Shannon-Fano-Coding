@@ -20,19 +20,19 @@ class SFTreeNode: public std::enable_shared_from_this<SFTreeNode>
 public:
     SFTreeNode(SFList p_payload, std::shared_ptr<SFTreeNode> p_parent = 0, std::size_t p_distance_to_root = 0);
 
-    void setRightChild(SFList p_payload);
-    void setLeftChild(SFList p_payload);
+    void setRightChild(const SFList p_payload);
+    void setLeftChild(const SFList p_payload);
 
     bool step();
     bool step_back();
 
     bool smallStep();
 
-    std::size_t getShortestDistanceToLeaf(){return m_shortest_distance_to_leaf;}
-    std::size_t getDistanceToRoot(){return m_distance_to_root;}
+    std::size_t getShortestDistanceToLeaf() const {return m_shortest_distance_to_leaf;}
+    std::size_t getDistanceToRoot() const {return m_distance_to_root;}
 
-    double sumBranch();
-    double balance();
+    double sumBranch() const;
+    double balance() const;
 
     std::size_t depth();
     static QImage drawTree(std::shared_ptr<SFTreeNode> root, int width, int height);
