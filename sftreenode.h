@@ -5,12 +5,18 @@
 
 #include <cmath>
 #include <memory>
+#include <stack>
 #include <tuple>
 
 #include "sflist.h"
 
-const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branches that are to small
 
+class SFTreeNode;
+
+const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branches that are to small
+typedef std::tuple<std::shared_ptr<SFTreeNode>, int> StepInstruction ;     //represents a step in the construction of the tree. used in step_history. The following enums are used for the 2 ints
+typedef std::stack<StepInstruction> TreeHistoryStack;
+enum {SYMBOL_L_TO_R, NODE_SPLIT};
 
 /**
  * @brief The SFTreeNode class is a simple binary tree implementation with special functionality for the Shannon Fano coding
@@ -19,6 +25,8 @@ class SFTreeNode: public std::enable_shared_from_this<SFTreeNode>
 {
 public:
     SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_parent = 0, std::size_t p_distance_to_root = 0);
+
+    ~SFTreeNode();
 
     void setRightChild(const SFList p_payload);
     void setLeftChild(const SFList p_payload);
@@ -43,7 +51,6 @@ private:
     void setShortestDistanceToLeaf(size_t p_distance);
     void setDistanceToRoot(size_t p_distance);
 
-
     bool smallStep_helper_left();
     bool smallStep_helper_right();
 
@@ -55,6 +62,12 @@ private:
 
     std::size_t m_distance_to_root;
     std::size_t m_shortest_distance_to_leaf;
+
+    std::shared_ptr<TreeHistoryStack> m_step_history;
+
+                                       //declares what kind of operation was performed
+
+
 };
 
 #endif // SFTREENODE_H

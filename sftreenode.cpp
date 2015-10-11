@@ -6,7 +6,15 @@ SFTreeNode::SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_par
     m_distance_to_root(p_distance_to_root),
     m_shortest_distance_to_leaf(0)
 {
+    m_step_history = std::make_shared<TreeHistoryStack>();
 }
+
+
+SFTreeNode::~SFTreeNode()
+{
+
+}
+
 
 /**
  * @brief SFTreeNode::setRightChild creates a right child with the given payload setting m_shortest_distance_to_leaf to 1
@@ -15,6 +23,7 @@ SFTreeNode::SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_par
 void SFTreeNode::setRightChild(const SFList p_payload)
 {
     m_right_child = std::make_shared<SFTreeNode>(p_payload, shared_from_this(), m_distance_to_root+1);
+    m_right_child->m_step_history = m_step_history;
     setShortestDistanceToLeaf(1);
 }
 
@@ -25,6 +34,7 @@ void SFTreeNode::setRightChild(const SFList p_payload)
 void SFTreeNode::setLeftChild(const SFList p_payload)
 {
     m_left_child = std::make_shared<SFTreeNode>(p_payload, shared_from_this(), m_distance_to_root+1);
+    m_left_child->m_step_history = m_step_history;
     setShortestDistanceToLeaf(1);
 }
 
@@ -46,14 +56,20 @@ bool SFTreeNode::step()
         setRightChild(m_payload.mid(pos));
         m_payload.clear();                                                          //SFList::mid() constructs a copy
         result = true;                                                              //so m_payload needs to be cleared
+        m_step_history->push(StepInstruction(shared_from_this(), NODE_SPLIT));
     }
     else
     {
         if(m_left_child)                                            //if nothing was changed (result = false)
-            result =result || m_left_child->step();                 //proceed with left child
-        if(m_right_child)                                           //if still nothing was changed
-            result = result || m_right_child->step();               //proceed with right child
-    }                                                               //note that m_right/left_child->step() is only calle if result = false
+        {
+
+            result =result || m_left_child->step();
+        }
+        if(m_right_child)                                           //if still nothing was changed//proceed with left child proceed with right child
+        {
+            result = result || m_right_child->step();               //note that m_right/left_child->step() is only called if result = false
+        }
+    }
     return result;
 }
 
@@ -64,31 +80,50 @@ bool SFTreeNode::step()
 bool SFTreeNode::step_back()
 {
     bool result = false;
-    if(m_shortest_distance_to_leaf == 1)                //if this is the last node before a leaf
-    {
-        if(m_left_child)
-        {
-            m_payload += m_left_child->m_payload;       //put the payload of the child into this node
-            m_left_child.reset();                       //and delete the child
-            result = true;
-        }
-        if(m_right_child)                               //do the same for the other child
-        {
-            m_payload += m_right_child->m_payload;
-            m_right_child.reset();
-            result = true;
-        }
-    }
-    else
-    {
-        if(m_left_child)                                    //if the children aren't leafs call their step_back()
-            result = result || m_left_child->step_back();
-        if(m_right_child)
-            result = result || m_right_child->step_back();
-    }
+//    if(m_shortest_distance_to_leaf == 1)                //if this is the last node before a leaf
+//    {
+//        if(m_left_child)
+//        {
+//            m_payload += m_left_child->m_payload;       //put the payload of the child into this node
+//            m_left_child.reset();                       //and delete the child
+//            result = true;
+//        }
+//        if(m_right_child)                               //do the same for the other child
+//        {
+//            m_payload += m_right_child->m_payload;
+//            m_right_child.reset();
+//            result = true;
+//        }
+//    }
+//    else
+//    {
+//        if(m_left_child)                                    //if the children aren't leafs call their step_back()
+//            result = result || m_left_child->step_back();
+//        if(m_right_child)
+//            result = result || m_right_child->step_back();
+//    }
 
-    if(!m_right_child && !m_left_child)                     //if the current node has no children left it becomes a leaf
-        setShortestDistanceToLeaf(0);
+//    if(!m_right_child && !m_left_child)                     //if the current node has no children left it becomes a leaf
+//        setShortestDistanceToLeaf(0);
+//    return result;
+    if(m_step_history->size())
+    {
+        StepInstruction last_step = m_step_history->top();
+        std::shared_ptr<SFTreeNode> node = std::get<0>(last_step);
+
+        if(std::get<1>(last_step) == NODE_SPLIT)
+        {
+            node->killChildren();
+        }
+        else if(std::get<1>(last_step) == SYMBOL_L_TO_R)
+        {
+          Symbol sym = node->m_parent->m_right_child->m_payload.first();
+          node->m_payload.push_back(sym);
+          node->m_parent->m_right_child->m_payload.pop_front();
+        }
+        m_step_history->pop();
+        result = true;
+    }
     return result;
 }
 
@@ -107,6 +142,8 @@ bool SFTreeNode::smallStep()
         setRightChild(SFList());        //balancing is done by smallStep_helper_left()
         m_payload.clear();
         result = true;
+
+        m_step_history->push(StepInstruction(shared_from_this(), NODE_SPLIT));
     }
     else                                                    //root was already split
     {
@@ -118,63 +155,7 @@ bool SFTreeNode::smallStep()
     return result;
 }
 
-/**
- * @brief SFTreeNode::smallStep_helper_left is called if this node should make a (small) step and it is the left child of its parent node
- * @return  true if the tree was modified in this node or one of it's children. false elswise
- */
-bool SFTreeNode::smallStep_helper_left()
-{
-    bool result = false;
-    if(m_payload.length() > 1)      //leaf of the tree in it's current form but not a leaf of the final tree (leafs only hold 1 symbol)
-    {
-        double balance = m_parent->balance();
-        if(std::abs(balance) > std::abs(balance - (2*m_payload.last().getProb())))  //if the balance can be improved do so
-        {
-            m_parent->m_right_child->m_payload.push_front(m_payload.last());
-            m_payload.pop_back();
-            result = true;
-        }
-        else                                                                        //otherwise add children
-        {
-            setLeftChild(m_payload);
-            setRightChild(SFList());
-            m_payload.clear();
-            result = true;
-        }
-    }
-    else                                                                            //node without symbols => nodes within the tree
-    {
-        if(m_left_child)                                                            //nothing to do here so we move one to the two
-            result = m_left_child->smallStep_helper_left();
-        if(m_right_child && !result)
-            result = m_right_child->smallStep_helper_right();                       //child nodes
-    }
-    return result;
-}
 
-/**
- * @brief SFTreeNode::smallStep_helper_right is called if this node should make a (small) step and it is the right child of its parent node
- * @return true if the tree was modified in this node or one of it's children. false elswise
- */
-bool SFTreeNode::smallStep_helper_right()
-{
-    bool result = false;
-    if(m_payload.length() > 1)      //when we arrive on a right branch the balancing has already happened
-    {                               //if there are more than one character in this node it can't be a leaf
-        setLeftChild(m_payload);    //of the final tree so we need to add more children
-        setRightChild(SFList());
-        m_payload.clear();
-        result = true;
-    }
-    else                                                        //node holds no symbols => note not a leaf
-    {
-        if(m_left_child)
-            result = m_left_child->smallStep_helper_left();     //move on to child nodes
-        if(m_right_child && !result)
-            result = m_right_child->smallStep_helper_right();
-    }
-    return result;
-}
 
 /**
  * @brief SFTreeNode::drawTree creates a QImage depicting the tree starting at p_root
@@ -308,14 +289,22 @@ double SFTreeNode::sumBranch() const
 }
 
 /**
- * @brief SFTreeNode::killChildren destroys all children of this node
+ * @brief SFTreeNode::killChildren merges the children's payload into this one and destroys all children of this node
  */
 void SFTreeNode::killChildren()
 {
     if(m_left_child)
+    {
+        m_left_child->killChildren();
+        m_payload += m_left_child->m_payload;
         m_left_child.reset();
+    }
     if(m_right_child)
+    {
+        m_right_child->killChildren();
+        m_payload += m_right_child->m_payload;
         m_right_child.reset();
+    }
 }
 
 /**
@@ -352,4 +341,68 @@ std::size_t SFTreeNode::depth()
     }
 
     return (depth_left > depth_right)?(depth_left):(depth_right);   //return the bigge of the wo values
+}
+
+/**
+ * @brief SFTreeNode::smallStep_helper_left is called if this node should make a (small) step and it is the left child of its parent node
+ * @return  true if the tree was modified in this node or one of it's children. false elswise
+ */
+bool SFTreeNode::smallStep_helper_left()
+{
+    bool result = false;
+    if(m_payload.length() > 1)      //leaf of the tree in it's current form but not a leaf of the final tree (leafs only hold 1 symbol)
+    {
+        double balance = m_parent->balance();
+        if(std::abs(balance) > std::abs(balance - (2*m_payload.last().getProb())))  //if the balance can be improved do so
+        {
+            m_parent->m_right_child->m_payload.push_front(m_payload.last());
+            m_payload.pop_back();
+            result = true;
+
+            m_step_history->push(StepInstruction(shared_from_this(), SYMBOL_L_TO_R));
+        }
+        else                                                                        //otherwise add children
+        {
+            setLeftChild(m_payload);
+            setRightChild(SFList());
+            m_payload.clear();
+            result = true;
+
+            m_step_history->push(StepInstruction(shared_from_this(), NODE_SPLIT));
+        }
+    }
+    else                                                                            //node without symbols => nodes within the tree
+    {
+        if(m_left_child)                                                            //nothing to do here so we move one to the two
+            result = m_left_child->smallStep_helper_left();
+        if(m_right_child && !result)
+            result = m_right_child->smallStep_helper_right();                       //child nodes
+    }
+    return result;
+}
+
+/**
+ * @brief SFTreeNode::smallStep_helper_right is called if this node should make a (small) step and it is the right child of its parent node
+ * @return true if the tree was modified in this node or one of it's children. false elswise
+ */
+bool SFTreeNode::smallStep_helper_right()
+{
+    bool result = false;
+    if(m_payload.length() > 1)      //when we arrive on a right branch the balancing has already happened
+    {                               //if there are more than one character in this node it can't be a leaf
+        setLeftChild(m_payload);    //of the final tree so we need to add more children
+        setRightChild(SFList());
+        m_payload.clear();
+        result = true;
+
+        m_step_history->push(StepInstruction(shared_from_this(), NODE_SPLIT));
+    }
+    else                                                        //node holds no symbols => note not a leaf
+    {
+        if(m_left_child)
+            result = m_left_child->smallStep_helper_left();     //move on to child nodes
+        if(m_right_child && !result)
+            result = m_right_child->smallStep_helper_right();
+    }
+    return result;
 }
