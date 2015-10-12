@@ -65,7 +65,8 @@ void MainWindow::on_autoStepCheck_clicked()
 {
     ui->StepBotton->setDisabled(ui->autoStepCheck->isChecked());
     ui->PrevStepBottom->setDisabled(ui->autoStepCheck->isChecked());
-    codeTree = std::make_shared<SFTreeNode>(codec->getIndex());
+    ui->smallStepCheck->setDisabled(ui->autoStepCheck->isChecked());
+
     if(codeTree && ui->autoStepCheck->isChecked())
     {
         while(codeTree->step());
@@ -76,9 +77,9 @@ void MainWindow::on_autoStepCheck_clicked()
 
 void MainWindow::on_smallStepCheck_clicked()
 {
+    ui->autoStepCheck->setDisabled(ui->smallStepCheck->isChecked());
 
-    codeTree.reset();
-    codeTree = std::make_shared<SFTreeNode>(codec->getIndex());
+
     ui->treeView->setPixmap(QPixmap::fromImage(SFTreeNode::drawTree(codeTree,ui->treeView->width(), ui->treeView->height())));
 }
 
