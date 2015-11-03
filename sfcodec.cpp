@@ -63,22 +63,25 @@ void SFCodec::updateIndex()
     if(inputText.length() == 0)
         return;
 
-    QString wc_inputText = inputText;
-    QChar t_symbol_buffer;
-
-    while(wc_inputText.size())
+    int t_pos;
+    for(auto t_char:inputText)
     {
-        t_symbol_buffer = wc_inputText.at(0);
-        index.push_front(Symbol(t_symbol_buffer));
-        index[0].setCount(wc_inputText.count(t_symbol_buffer, Qt::CaseSensitive));
-        wc_inputText.remove(t_symbol_buffer, Qt::CaseSensitive);
+        t_pos = index.indexOf(t_char);
+        if(t_pos >= 0)
+        {
+            index[t_pos].operator ++(1);
+        }
+        else
+        {
+            index.push_back(Symbol(t_char));
+            index.last().setCount(1);
+        }
     }
 
     for(auto &sym:index)
         sym.setProb((double)sym.getCount()/(double)inputText.length());
 
     qSort(index.begin(),index.end()); //the list has to be sorted from highest to lowest probability
-
     updateIndexHelper(index.begin(), index.end());
 }
 

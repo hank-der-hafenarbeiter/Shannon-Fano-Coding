@@ -47,8 +47,12 @@ void SFTreeNode::setLeftChild(const SFList p_payload)
 bool SFTreeNode::step()
 {
     bool result = false;
+    if(m_step_history->size() && std::get<1>(m_step_history->top()) != BALANCED_NODE_SPLIT)   //step() only performs balanced splits
+    {                                                               //if the last step was not a balanced split
+        result = smallStepToBigStep();                                       //it has to have been a small step and the tree
+    }                                                               //might be in an unbalanced state
 
-    if(m_payload.length() > 1)  //Node contains more than one Symbol it will be an inner node in the final tree therefore
+    if(!result && m_payload.length() > 1)  //Node contains more than one Symbol it will be an inner node in the final tree therefore
     {
         SFList::iterator iter = SFList::split(m_payload.begin(), m_payload.end());  //the payload needs to be split into two
         int pos = iter - m_payload.begin();
@@ -56,7 +60,7 @@ bool SFTreeNode::step()
         setRightChild(m_payload.mid(pos));
         m_payload.clear();                                                          //SFList::mid() constructs a copy
         result = true;                                                              //so m_payload needs to be cleared
-        m_step_history->push(StepInstruction(shared_from_this(), NODE_SPLIT));
+        m_step_history->push(StepInstruction(shared_from_this(), BALANCED_NODE_SPLIT));
     }
     else
     {
@@ -80,38 +84,13 @@ bool SFTreeNode::step()
 bool SFTreeNode::step_back()
 {
     bool result = false;
-//    if(m_shortest_distance_to_leaf == 1)                //if this is the last node before a leaf
-//    {
-//        if(m_left_child)
-//        {
-//            m_payload += m_left_child->m_payload;       //put the payload of the child into this node
-//            m_left_child.reset();                       //and delete the child
-//            result = true;
-//        }
-//        if(m_right_child)                               //do the same for the other child
-//        {
-//            m_payload += m_right_child->m_payload;
-//            m_right_child.reset();
-//            result = true;
-//        }
-//    }
-//    else
-//    {
-//        if(m_left_child)                                    //if the children aren't leafs call their step_back()
-//            result = result || m_left_child->step_back();
-//        if(m_right_child)
-//            result = result || m_right_child->step_back();
-//    }
 
-//    if(!m_right_child && !m_left_child)                     //if the current node has no children left it becomes a leaf
-//        setShortestDistanceToLeaf(0);
-//    return result;
     if(m_step_history->size())
     {
         StepInstruction last_step = m_step_history->top();
         std::shared_ptr<SFTreeNode> node = std::get<0>(last_step);
 
-        if(std::get<1>(last_step) == NODE_SPLIT)
+        if(std::get<1>(last_step) == NODE_SPLIT || std::get<1>(last_step) == BALANCED_NODE_SPLIT)
         {
             node->killChildren();
         }
@@ -155,7 +134,52 @@ bool SFTreeNode::smallStep()
     return result;
 }
 
+/**
+ * @brief SFTreeNode::smallStepToBigStep has to be called when changing from small steps to big steps
+ *
+ * when SFTreeNode::step() is called it assumes that all parent nodes are balanced.
+ * After a small step this isn't garanteed anymore. This has to be fixed before proceeding
+ * with big steps.
+ * When splitting a node SFTreeNode::step() also balances the two children.
+ * SFTreeNode::smallStep() does not because it's purpose is to show the balancing process.
+ * Before calling SFTreeNode::step() again this balancing process has to be finished.
+ */
+bool SFTreeNode::smallStepToBigStep()
+{
+    bool result = false;
+    StepInstruction last_step = m_step_history->top();
 
+    Q_ASSERT(std::get<1>(last_step) != BALANCED_NODE_SPLIT);    //if the last instruction was a balanced split this should never have been called
+
+    if(std::get<1>(last_step) == NODE_SPLIT)
+    {
+        std::get<0>(last_step)->killChildren();
+        m_step_history->pop();
+        std::get<0>(last_step)->step();
+        result = true;
+    }
+    else
+    {
+        std::shared_ptr<SFTreeNode> left_node = std::get<0>(last_step);
+        std::shared_ptr<SFTreeNode> right_node = left_node->m_parent->m_right_child;
+        double balance = left_node->m_parent->balance();
+        double balance_after_sym_shift = 2*left_node->m_payload.last().getProb();
+
+        while(std::abs(balance) > std::abs(balance_after_sym_shift))
+        {
+            right_node->m_payload.push_front(left_node->m_payload.last());
+            left_node->m_payload.pop_back();
+            balance = left_node->m_parent->balance();
+            balance_after_sym_shift = 2*left_node->m_payload.last().getProb();
+
+            result = true;
+            m_step_history->push(StepInstruction(left_node, SYMBOL_L_TO_R));
+        }
+
+    }
+
+    return result;
+}
 
 /**
  * @brief SFTreeNode::drawTree creates a QImage depicting the tree starting at p_root
@@ -241,7 +265,12 @@ void SFTreeNode::draw(QPainter& p_painter, QPoint p_start, int p_distance_v, int
     {
         QString str;
         for(Symbol sym:m_payload)
-            str += sym.getSym();
+        {
+            if(sym.getSym() == ' ')
+                str += "'_'";
+            else
+                str += sym.getSym();
+        }
         p_start += QPoint(-5*(str.length()/2),15);
         p_painter.drawText(p_start, str);
 

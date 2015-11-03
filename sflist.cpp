@@ -35,6 +35,7 @@ inline double SFList::sum() const
  */
 inline double SFList::sum(const SFList::iterator it1, const SFList::iterator it2)
 {
+
     double sum = 0;
     for(SFList::iterator i = it1; i != it2; i++)
     {
@@ -51,6 +52,8 @@ inline double SFList::sum(const SFList::iterator it1, const SFList::iterator it2
  */
 SFList::iterator SFList::split(const SFList::iterator it1, const SFList::iterator it2) //There is an exact solution to this problem in pseudo-linear time but i chose an easier heuristic that grants adequate results
 {
+
+    qDebug() << "list size:" << it2-it1;
     SFList::iterator iter = it2;
 
     if(it2-it1 > 1)

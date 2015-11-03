@@ -143,14 +143,14 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <widget class="QPushButton" name="StepBotton">
+             <widget class="QPushButton" name="StepButton">
               <property name="text">
                <string>Next Step</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="PrevStepBottom">
+             <widget class="QPushButton" name="PrevStepButton">
               <property name="text">
                <string>Previous Step</string>
               </property>

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <QObject>
+#include <QDebug>
 #include <QVector>
 #include <QString>
 #include <QChar>
@@ -18,6 +19,7 @@
 #include <QDebug>
 #include <functional>
 #include <bitset>
+#include <cassert>
 
 #include "sflist.h"
 #include "sftreenode.h"

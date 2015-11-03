@@ -2,6 +2,7 @@
 #define SFVector_H
 
 #include <iostream>
+#include <cassert>
 #include <QVector>
 #include <QObject>
 #include "symbol.h"

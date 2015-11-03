@@ -13,16 +13,19 @@
 
 class SFTreeNode;
 
-const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branches that are to small
-typedef std::tuple<std::shared_ptr<SFTreeNode>, int> StepInstruction ;     //represents a step in the construction of the tree. used in step_history. The following enums are used for the 2 ints
-typedef std::stack<StepInstruction> TreeHistoryStack;
-enum {SYMBOL_L_TO_R, NODE_SPLIT};
 
 /**
  * @brief The SFTreeNode class is a simple binary tree implementation with special functionality for the Shannon Fano coding
  */
 class SFTreeNode: public std::enable_shared_from_this<SFTreeNode>
 {
+private:
+    //Types and constants
+    const int LABEL_LIMIT = 20; //Used in draw to prevend labels been drawn in branches that are to small
+    typedef std::tuple<std::shared_ptr<SFTreeNode>, int> StepInstruction ;     //represents a step in the construction of the tree. used in step_history. The following enums are used for the 2 ints
+    typedef std::stack<StepInstruction> TreeHistoryStack;
+    enum {SYMBOL_L_TO_R, NODE_SPLIT, BALANCED_NODE_SPLIT};
+
 public:
     SFTreeNode(const SFList p_payload, std::shared_ptr<SFTreeNode> p_parent = 0, std::size_t p_distance_to_root = 0);
 
@@ -33,7 +36,6 @@ public:
 
     bool step();
     bool step_back();
-
     bool smallStep();
 
     std::size_t getShortestDistanceToLeaf() const {return m_shortest_distance_to_leaf;}
@@ -44,6 +46,7 @@ public:
 
     std::size_t depth();
     static QImage drawTree(std::shared_ptr<SFTreeNode> root, int width, int height);
+
 private:
 
     void draw(QPainter& p_img, QPoint p_start, int p_distance_v, int p_distance_h) const;
@@ -53,6 +56,7 @@ private:
 
     bool smallStep_helper_left();
     bool smallStep_helper_right();
+    bool smallStepToBigStep();
 
     std::shared_ptr<SFTreeNode> m_parent;
     std::shared_ptr<SFTreeNode> m_left_child;
@@ -64,8 +68,6 @@ private:
     std::size_t m_shortest_distance_to_leaf;
 
     std::shared_ptr<TreeHistoryStack> m_step_history;
-
-                                       //declares what kind of operation was performed
 
 
 };
