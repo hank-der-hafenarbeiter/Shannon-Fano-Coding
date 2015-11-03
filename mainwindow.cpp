@@ -171,7 +171,6 @@ void MainWindow::updateTreeView()
 
 void MainWindow::updateBin()
 {
-    std::bitset<8> bitset;
     QString outputBin, inputText = ui->inputField->toPlainText();
     for(auto const character:inputText)
     {
